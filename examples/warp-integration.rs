@@ -1,0 +1,16 @@
+use warp::Filter;
+
+fn main() {
+    for _ in 0..num_cpus::get() {
+        std::thread::spawn(|| smol::run(futures::future::pending::<()>()));
+    }
+
+    smol::block_on(async {
+        let hello = warp::path!("hello" / String)
+            .map(|name| format!("Hello, {}!", name));
+
+        warp::serve(hello)
+            .run(([127, 0, 0, 1], 8080))
+            .await;
+    })
+}
